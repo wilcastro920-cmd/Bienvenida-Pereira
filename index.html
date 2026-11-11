@@ -4,200 +4,73 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Bienvenida Pereira — Cuenta Regresiva</title>
-
   <meta property="og:title" content="✨ Bienvenida Pereira — Cuenta Regresiva" />
   <meta property="og:description" content="Toca para ver cuánto falta para el sábado a las 7:00 AM." />
   <meta property="og:type" content="website" />
-
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: #090d16;
-      color: #ffffff;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      height: 100dvh;
-      width: 100vw;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      text-align: center;
+      background: #090d16; color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      height: 100dvh; width: 100vw; overflow: hidden;
+      display: flex; flex-direction: column; align-items: center; text-align: center;
     }
-
-    /* Fondo animado píxel art a pantalla completa */
-    canvas#pixel-bg {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100dvh;
-      z-index: 0;
-      image-rendering: pixelated;
-      image-rendering: crisp-edges;
-      pointer-events: none;
+    canvas#pixel-bg, canvas#fx-canvas {
+      position: fixed; inset: 0; width: 100vw; height: 100dvh; pointer-events: none;
     }
-
-    /* Capa de confeti */
-    canvas#fx-canvas {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100dvh;
-      z-index: 2;
-      pointer-events: none;
-    }
-
-    /* Botón discreto de música ambiental */
+    canvas#pixel-bg { z-index: 0; image-rendering: pixelated; image-rendering: crisp-edges; }
+    canvas#fx-canvas { z-index: 2; }
     .audio-btn {
-      position: fixed;
-      top: 0.65rem;
-      right: 0.75rem;
-      z-index: 10;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.4rem 0.75rem;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: rgba(9, 13, 22, 0.62);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      color: #e2e8f0;
-      font-size: 0.72rem;
-      font-weight: 500;
-      cursor: pointer;
+      position: fixed; top: 0.65rem; right: 0.75rem; z-index: 10;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.4rem 0.75rem; border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.22); background: rgba(9,13,22,0.65);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      color: #e2e8f0; font-size: 0.72rem; font-weight: 500; cursor: pointer;
     }
-
-    .audio-btn.playing {
-      border-color: rgba(255, 209, 102, 0.65);
-      color: #ffd166;
-    }
-
-    .equalizer {
-      display: inline-flex;
-      align-items: flex-end;
-      gap: 2px;
-      height: 10px;
-      width: 10px;
-    }
-
-    .equalizer span {
-      display: block;
-      width: 2px;
-      height: 3px;
-      background: currentColor;
-      border-radius: 2px;
-    }
-
-    .audio-btn.playing .equalizer span:nth-child(1) { animation: eqBounce 0.7s ease-in-out infinite alternate; }
-    .audio-btn.playing .equalizer span:nth-child(2) { animation: eqBounce 0.5s ease-in-out 0.2s infinite alternate; }
-    .audio-btn.playing .equalizer span:nth-child(3) { animation: eqBounce 0.8s ease-in-out 0.1s infinite alternate; }
-
-    @keyframes eqBounce {
-      from { height: 3px; }
-      to { height: 10px; }
-    }
-
-    /* Tarjeta superior compacta con el reloj */
+    .audio-btn.playing { border-color: rgba(255,209,102,0.7); color: #ffd166; }
+    .eq { display: inline-flex; align-items: flex-end; gap: 2px; height: 10px; width: 10px; }
+    .eq span { width: 2px; height: 3px; background: currentColor; border-radius: 2px; }
+    .audio-btn.playing .eq span:nth-child(1) { animation: eq 0.7s infinite alternate; }
+    .audio-btn.playing .eq span:nth-child(2) { animation: eq 0.5s 0.2s infinite alternate; }
+    .audio-btn.playing .eq span:nth-child(3) { animation: eq 0.8s 0.1s infinite alternate; }
+    @keyframes eq { from { height: 3px; } to { height: 10px; } }
     .top-hud {
-      position: relative;
-      z-index: 5;
-      width: min(92vw, 400px);
-      margin-top: 2.75rem;
-      padding: 0.9rem 1rem 0.95rem;
-      border-radius: 20px;
-      background: rgba(9, 13, 22, 0.64);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+      position: relative; z-index: 5; width: min(92vw, 400px); margin-top: 2.75rem;
+      padding: 0.9rem 1rem 0.95rem; border-radius: 20px;
+      background: rgba(9,13,22,0.64); border: 1px solid rgba(255,255,255,0.16);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.45);
     }
-
-    .top-hud.celebrating {
-      border-color: rgba(255, 209, 102, 0.6);
-      box-shadow: 0 12px 36px rgba(255, 209, 102, 0.25);
-    }
-
+    .top-hud.celebrating { border-color: rgba(255,209,102,0.65); }
     .badge {
-      display: inline-block;
-      padding: 0.2rem 0.65rem;
-      border-radius: 999px;
-      font-size: 0.65rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: #ffd166;
-      background: rgba(255, 209, 102, 0.14);
-      border: 1px solid rgba(255, 209, 102, 0.3);
-      margin-bottom: 0.35rem;
+      display: inline-block; padding: 0.2rem 0.65rem; border-radius: 999px;
+      font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: #ffd166; background: rgba(255,209,102,0.14);
+      border: 1px solid rgba(255,209,102,0.3); margin-bottom: 0.35rem;
     }
-
     h1 {
-      font-size: clamp(1.35rem, 5vw, 1.75rem);
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      background: linear-gradient(135deg, #ffffff 30%, #ffd166 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 0.2rem;
+      font-size: clamp(1.35rem, 5vw, 1.75rem); font-weight: 800;
+      background: linear-gradient(135deg, #fff 30%, #ffd166 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.2rem;
     }
-
-    .subtitle {
-      font-size: 0.78rem;
-      color: #cbd5e1;
-      margin-bottom: 0.75rem;
-    }
-
-    .timer-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0.45rem;
-    }
-
+    .subtitle { font-size: 0.78rem; color: #cbd5e1; margin-bottom: 0.75rem; }
+    .timer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.45rem; }
     .time-box {
-      background: rgba(15, 23, 42, 0.78);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 0.5rem 0.2rem;
-      transition: transform 0.18s ease, border-color 0.18s ease;
+      background: rgba(15,23,42,0.78); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px; padding: 0.5rem 0.2rem; transition: transform 0.18s;
     }
-
-    .time-box.tick {
-      transform: scale(1.03);
-      border-color: rgba(255, 209, 102, 0.4);
-    }
-
-    .number {
-      display: block;
-      font-size: clamp(1.2rem, 4.8vw, 1.55rem);
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
-      color: #f8fafc;
-      line-height: 1.1;
-    }
-
-    .label {
-      display: block;
-      font-size: 0.58rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #94a3b8;
-      margin-top: 0.2rem;
-    }
+    .time-box.tick { transform: scale(1.03); border-color: rgba(255,209,102,0.45); }
+    .number { display: block; font-size: clamp(1.2rem, 4.8vw, 1.55rem); font-weight: 700; font-variant-numeric: tabular-nums; }
+    .label { display: block; font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin-top: 0.2rem; }
   </style>
 </head>
 <body>
   <canvas id="pixel-bg"></canvas>
   <canvas id="fx-canvas"></canvas>
 
-  <button class="audio-btn" id="audio-toggle" type="button" aria-label="Música ambiental">
-    <span class="equalizer" aria-hidden="true">
-      <span></span><span></span><span></span>
-    </span>
+  <button class="audio-btn" id="audio-toggle" type="button">
+    <span class="eq"><span></span><span></span><span></span></span>
     <span id="audio-label">Música</span>
   </button>
 
@@ -205,428 +78,284 @@
     <span class="badge">Sábado • 7:00 AM</span>
     <h1>Bienvenida Pereira</h1>
     <p class="subtitle" id="status-text">Falta muy poco para vernos</p>
-
     <section class="timer-grid">
-      <div class="time-box">
-        <span class="number" id="days">00</span>
-        <span class="label">Días</span>
-      </div>
-      <div class="time-box">
-        <span class="number" id="hours">00</span>
-        <span class="label">Horas</span>
-      </div>
-      <div class="time-box">
-        <span class="number" id="minutes">00</span>
-        <span class="label">Min</span>
-      </div>
-      <div class="time-box" id="sec-box">
-        <span class="number" id="seconds">00</span>
-        <span class="label">Seg</span>
-      </div>
+      <div class="time-box"><span class="number" id="days">00</span><span class="label">Días</span></div>
+      <div class="time-box"><span class="number" id="hours">00</span><span class="label">Horas</span></div>
+      <div class="time-box"><span class="number" id="minutes">00</span><span class="label">Min</span></div>
+      <div class="time-box" id="sec-box"><span class="number" id="seconds">00</span><span class="label">Seg</span></div>
     </section>
   </header>
 
   <script>
-    // ==========================================
-    // 1. MOTOR PIXEL ART A PANTALLA COMPLETA
-    // ==========================================
-    const bgCanvas = document.getElementById("pixel-bg");
-    const pctx = bgCanvas.getContext("2d");
+    const bg = document.getElementById("pixel-bg"), pctx = bg.getContext("2d");
+    const fx = document.getElementById("fx-canvas"), fctx = fx.getContext("2d");
+    let W = 120, H = 260;
 
-    let W = 120;
-    let H = 260;
-
-    function resizePixelCanvas() {
-      const pixelSize = Math.max(3, Math.floor(Math.min(window.innerWidth, window.innerHeight) / 125));
-      W = Math.ceil(window.innerWidth / pixelSize);
-      H = Math.ceil(window.innerHeight / pixelSize);
-      bgCanvas.width = W;
-      bgCanvas.height = H;
+    function resizeAll() {
+      const s = Math.max(3, Math.floor(Math.min(window.innerWidth, window.innerHeight) / 125));
+      W = bg.width = Math.ceil(window.innerWidth / s);
+      H = bg.height = Math.ceil(window.innerHeight / s);
+      fx.width = window.innerWidth;
+      fx.height = window.innerHeight;
     }
+    window.addEventListener("resize", resizeAll);
+    resizeAll();
 
-    window.addEventListener("resize", resizePixelCanvas);
-    resizePixelCanvas();
-
-    // Fuente bitmap 5x5 para carteles dentro del escenario píxel
-    const FONT_5X5 = {
-      "A": ["01110","10001","11111","10001","10001"],
-      "B": ["11110","10001","11110","10001","11110"],
-      "C": ["01111","10000","10000","10000","01111"],
-      "D": ["11110","10001","10001","10001","11110"],
-      "E": ["11111","10000","11110","10000","11111"],
-      "G": ["01111","10000","10111","10001","01111"],
-      "I": ["111","010","010","010","111"],
-      "L": ["10000","10000","10000","10000","11111"],
-      "M": ["10001","11011","10101","10001","10001"],
-      "N": ["10001","11001","10101","10011","10001"],
-      "Ñ": ["01110","00000","11001","10101","10011"],
-      "O": ["01110","10001","10001","10001","01110"],
-      "P": ["11110","10001","11110","10000","10000"],
-      "R": ["11110","10001","11110","10100","10010"],
-      "T": ["11111","00100","00100","00100","00100"],
-      "X": ["10001","01010","00100","01010","10001"],
-      "-": ["000","000","111","000","000"],
-      " ": ["00","00","00","00","00"]
+    const F = {
+      A:["01110","10001","11111","10001","10001"], B:["11110","10001","11110","10001","11110"],
+      C:["01111","10000","10000","10000","01111"], D:["11110","10001","10001","10001","11110"],
+      E:["11111","10000","11110","10000","11111"], G:["01111","10000","10111","10001","01111"],
+      I:["111","010","010","010","111"], L:["10000","10000","10000","10000","11111"],
+      M:["10001","11011","10101","10001","10001"], N:["10001","11001","10101","10011","10001"],
+      NT:["01110","00000","11001","10101","10011"], O:["01110","10001","10001","10001","01110"],
+      P:["11110","10001","11110","10000","10000"], R:["11110","10001","11110","10100","10010"],
+      T:["11111","00100","00100","00100","00100"], X:["10001","01010","00100","01010","10001"],
+      " ":["00","00","00","00","00"]
     };
-
-    function measurePixelText(text) {
-      let width = 0;
-      for (let i = 0; i < text.length; i++) {
-        const g = FONT_5X5[text[i]] || FONT_5X5[" "];
-        width += g[0].length + 1;
-      }
-      return Math.max(0, width - 1);
-    }
-
-    function drawPixelText(text, x, y, color) {
-      pctx.fillStyle = color;
-      let cursorX = Math.round(x);
-      const startY = Math.round(y);
-      for (let i = 0; i < text.length; i++) {
-        const g = FONT_5X5[text[i]] || FONT_5X5[" "];
-        const gw = g[0].length;
-        for (let r = 0; r < g.length; r++) {
-          for (let c = 0; c < gw; c++) {
-            if (g[r][c] === "1") {
-              pctx.fillRect(cursorX + c, startY + r, 1, 1);
-            }
-          }
-        }
-        cursorX += gw + 1;
+    const glyph = ch => ch === "\u00d1" ? F.NT : (F[ch] || F[" "]);
+    const txtW = str => [...str].reduce((a, c) => a + glyph(c)[0].length + 1, -1);
+    function drawTxt(str, x, y, col) {
+      pctx.fillStyle = col;
+      let cx = Math.round(x), cy = Math.round(y);
+      for (const ch of str) {
+        const g = glyph(ch);
+        for (let r = 0; r < 5; r++)
+          for (let c = 0; c < g[0].length; c++)
+            if (g[r][c] === "1") pctx.fillRect(cx + c, cy + r, 1, 1);
+        cx += g[0].length + 1;
       }
     }
+    const px = (col, x, y, w, h) => { pctx.fillStyle = col; pctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); };
 
-    function px(color, x, y, w, h) {
-      pctx.fillStyle = color;
-      pctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+    function drawSky(cols) {
+      const bh = Math.ceil(H / cols.length);
+      cols.forEach((c, i) => px(c, 0, i * bh, W, bh + 1));
     }
-
-    function drawSky(colors) {
-      const bandH = Math.ceil(H / colors.length);
-      for (let i = 0; i < colors.length; i++) {
-        px(colors[i], 0, i * bandH, W, bandH + 1);
-      }
+    function drawClouds(t, col) {
+      [0, 1, 2].forEach(i => {
+        const w = 20 + i * 4;
+        const cx = W - (((t * (3.5 - i * 0.6) + i * 42) % (W + 45))) - 15;
+        const cy = Math.round(H * (0.28 + i * 0.06));
+        px(col, cx, cy, w, 4); px(col, cx + 3, cy - 3, w - 6, 3);
+      });
     }
-
-    function drawClouds(time, color) {
-      pctx.fillStyle = color;
-      const positions = [
-        { x: (W - ((time * 4) % (W + 40))) - 20, y: Math.round(H * 0.34), w: 22 },
-        { x: (W - ((time * 2.5 + 55) % (W + 50))) - 25, y: Math.round(H * 0.42), w: 28 },
-        { x: (W - ((time * 3.2 + 95) % (W + 45))) - 20, y: Math.round(H * 0.28), w: 18 }
-      ];
-      for (const c of positions) {
-        const cx = Math.round(c.x);
-        const cy = c.y;
-        px(color, cx, cy, c.w, 4);
-        px(color, cx + 3, cy - 3, c.w - 6, 3);
-        px(color, cx + 6, cy - 5, Math.max(4, c.w - 14), 2);
-      }
-    }
-
-    function drawBogotaHills(groundY) {
-      // Cerros Orientales y silueta de Monserrate
-      pctx.fillStyle = "#1e293b";
-      pctx.beginPath();
-      pctx.moveTo(0, groundY);
-      pctx.lineTo(0, groundY - 36);
-      pctx.lineTo(Math.round(W * 0.28), groundY - 58);
-      pctx.lineTo(Math.round(W * 0.58), groundY - 42);
-      pctx.lineTo(Math.round(W * 0.85), groundY - 52);
-      pctx.lineTo(W, groundY - 34);
-      pctx.lineTo(W, groundY);
-      pctx.fill();
-
-      // Santuario blanco diminuto en la cima de Monserrate
-      const peakX = Math.round(W * 0.28);
-      const peakY = groundY - 62;
-      px("#f8fafc", peakX - 2, peakY, 4, 4);
-      px("#f8fafc", peakX - 1, peakY - 2, 2, 2);
-    }
-
-    function drawPereiraMountains(groundY) {
-      // Montañas verdes del Eje Cafetero
-      pctx.fillStyle = "#064e3b";
-      pctx.beginPath();
-      pctx.moveTo(0, groundY);
-      pctx.lineTo(0, groundY - 42);
-      pctx.lineTo(Math.round(W * 0.22), groundY - 64);
-      pctx.lineTo(Math.round(W * 0.5), groundY - 46);
-      pctx.lineTo(Math.round(W * 0.78), groundY - 68);
-      pctx.lineTo(W, groundY - 40);
-      pctx.lineTo(W, groundY);
-      pctx.fill();
-
-      pctx.fillStyle = "#047857";
-      pctx.beginPath();
-      pctx.moveTo(0, groundY);
-      pctx.lineTo(0, groundY - 26);
-      pctx.lineTo(Math.round(W * 0.35), groundY - 44);
-      pctx.lineTo(Math.round(W * 0.68), groundY - 32);
-      pctx.lineTo(W, groundY - 48);
-      pctx.lineTo(W, groundY);
-      pctx.fill();
-    }
-
-    function drawPalmTree(x, groundY) {
-      px("#78350f", x, groundY - 18, 2, 18);
-      px("#10b981", x - 5, groundY - 20, 12, 2);
-      px("#10b981", x - 4, groundY - 22, 10, 2);
-      px("#059669", x - 6, groundY - 18, 3, 2);
-      px("#059669", x + 5, groundY - 18, 3, 2);
-    }
-
-    function drawCityBuildings(groundY, time) {
-      const blds = [
-        { x: 4, w: 16, h: 42, c: "#0f172a" },
-        { x: 24, w: 14, h: 56, c: "#1e1b4b" },
-        { x: 42, w: 18, h: 38, c: "#0f172a" },
-        { x: W - 38, w: 16, h: 50, c: "#1e1b4b" },
-        { x: W - 18, w: 15, h: 36, c: "#0f172a" }
-      ];
-      for (const b of blds) {
-        px(b.c, b.x, groundY - b.h, b.w, b.h);
-        for (let wy = groundY - b.h + 5; wy < groundY - 8; wy += 7) {
-          for (let wx = b.x + 3; wx < b.x + b.w - 4; wx += 5) {
-            const lit = ((wx + wy + Math.floor(time)) % 3) !== 0;
-            px(lit ? "#fde047" : "#334155", wx, wy, 2, 3);
-          }
-        }
-      }
-    }
-
-    function drawStreetSign(text, x, groundY) {
-      px("#64748b", x, groundY - 22, 2, 22);
-      const tw = measurePixelText(text) + 6;
-      const sx = Math.max(2, Math.min(W - tw - 2, x - Math.floor(tw / 2) + 1));
-      px("#1d4ed8", sx, groundY - 30, tw, 9);
-      px("#93c5fd", sx, groundY - 30, tw, 1);
-      drawPixelText(text, sx + 3, groundY - 28, "#ffffff");
-    }
-
-    function drawRoad(groundY) {
-      px("#334155", 0, groundY, W, 5); // Acera
-      px("#1e293b", 0, groundY + 5, W, H - groundY - 5); // Calzada
-      const midY = groundY + Math.min(18, Math.floor((H - groundY) * 0.45));
-      for (let x = 4; x < W; x += 14) {
-        px("#facc15", x, midY, 7, 2);
-      }
-    }
-
-    function drawRunway(groundY) {
-      px("#1e293b", 0, groundY, W, H - groundY);
-      px("#94a3b8", 0, groundY + 1, W, 1);
-      for (let x = 6; x < W; x += 16) {
-        px("#f8fafc", x, groundY + 12, 8, 2);
-        px("#ef4444", x, groundY + 2, 2, 2);
-      }
-    }
-
-    function drawAirportBuilding(topText, bottomText, x, groundY, w) {
-      const h = 38;
-      const y = groundY - h;
-      // Edificio terminal
-      px("#1e293b", x, y, w, h);
-      px("#334155", x - 2, y - 3, w + 4, 3);
-      // Ventanales de cristal
-      px("#38bdf8", x + 4, y + 14, w - 8, 12);
-      px("#7dd3fc", x + 6, y + 15, w - 12, 4);
-      // Puertas centrales
-      const doorX = x + Math.floor(w / 2) - 6;
-      px("#0f172a", doorX, groundY - 11, 12, 11);
-      px("#bae6fd", doorX + 1, groundY - 10, 4, 10);
-      px("#bae6fd", doorX + 7, groundY - 10, 4, 10);
-
-      // Letrero superior de la terminal
-      const tw1 = measurePixelText(topText) + 4;
-      const sx1 = x + Math.floor((w - tw1) / 2);
-      px("#0f172a", sx1, y - 11, tw1, 8);
-      drawPixelText(topText, sx1 + 2, y - 9, "#ffd166");
-
-      // Letrero secundario en la fachada
-      const tw2 = measurePixelText(bottomText);
-      const sx2 = x + Math.floor((w - tw2) / 2);
-      drawPixelText(bottomText, sx2, y + 5, "#f8fafc");
-    }
-
-    function drawTaxi(x, y, moving) {
-      const bob = moving ? Math.round(Math.sin(Date.now() / 80)) : 0;
-      const ty = y + bob;
-      // Techo y cabina
-      px("#facc15", x + 5, ty, 16, 6);
-      // Letrero TAXI
-      px("#ffffff", x + 10, ty - 3, 6, 3);
-      px("#0f172a", x + 12, ty - 2, 2, 1);
-      // Ventanas
-      px("#38bdf8", x + 6, ty + 1, 6, 4);
-      px("#38bdf8", x + 14, ty + 1, 6, 4);
-      // Carrocería
-      px("#eab308", x, ty + 6, 27, 7);
-      px("#0f172a", x + 2, ty + 9, 23, 1); // Franja negra
-      // Faros y stops
-      px("#fef08a", x + 25, ty + 7, 2, 3);
-      px("#ef4444", x, ty + 7, 2, 3);
-      // Llantas
-      px("#090d16", x + 4, ty + 11, 5, 5);
-      px("#94a3b8", x + 6, ty + 13, 1, 1);
-      px("#090d16", x + 18, ty + 11, 5, 5);
-      px("#94a3b8", x + 20, ty + 13, 1, 1);
-    }
-
-    function drawSuitcase(x, y) {
-      px("#475569", x + 2, y - 3, 1, 3);
-      px("#475569", x + 1, y - 3, 3, 1);
-      px("#d946ef", x, y, 5, 7);
-      px("#f0abfc", x + 1, y + 1, 1, 5);
-      px("#0f172a", x + 1, y + 7, 1, 1);
-      px("#0f172a", x + 3, y + 7, 1, 1);
-    }
-
-    function drawGirl(x, y, walkPhase, waveArm) {
-      const step = Math.round(Math.sin(walkPhase) * 1.5);
-      // Cabello largo oscuro
-      px("#451a03", x, y, 7, 10);
-      // Rostro
-      px("#fed7aa", x + 2, y + 2, 4, 4);
-      px("#0f172a", x + 4, y + 3, 1, 1); // Ojo
-      // Chaqueta rosa/coral
-      px("#f43f5e", x + 1, y + 6, 5, 6);
-      // Brazo saludando o normal
-      if (waveArm) {
-        px("#f43f5e", x - 2, y + 3, 3, 2);
-        px("#fed7aa", x - 3, y + 2, 2, 2);
+    function drawHills(gY, pereira) {
+      pctx.fillStyle = pereira ? "#064e3b" : "#1e293b";
+      pctx.beginPath(); pctx.moveTo(0, gY);
+      pctx.lineTo(0, gY - 38); pctx.lineTo(W * 0.26, gY - 62);
+      pctx.lineTo(W * 0.54, gY - 42); pctx.lineTo(W * 0.8, gY - 64);
+      pctx.lineTo(W, gY - 36); pctx.lineTo(W, gY); pctx.fill();
+      if (!pereira) {
+        px("#f8fafc", W * 0.26 - 2, gY - 66, 4, 4);
       } else {
-        px("#f43f5e", x + 2, y + 7, 2, 4);
+        pctx.fillStyle = "#047857";
+        pctx.beginPath(); pctx.moveTo(0, gY); pctx.lineTo(0, gY - 24);
+        pctx.lineTo(W * 0.4, gY - 44); pctx.lineTo(W * 0.72, gY - 30);
+        pctx.lineTo(W, gY - 46); pctx.lineTo(W, gY); pctx.fill();
       }
-      // Piernas (jean azul)
-      px("#1d4ed8", x + 1, y + 12, 2, 5 + step);
-      px("#1d4ed8", x + 4, y + 12, 2, 5 - step);
     }
-
-    function drawBoy(x, y, walkPhase) {
-      const step = Math.round(Math.sin(walkPhase) * 1.5);
-      // Cabello corto
-      px("#1e293b", x + 1, y, 5, 3);
-      // Rostro
-      px("#fed7aa", x + 1, y + 2, 4, 4);
-      px("#0f172a", x + 2, y + 3, 1, 1); // Ojo
-      // Chaqueta verde esmeralda
-      px("#10b981", x + 1, y + 6, 5, 7);
-      px("#059669", x + 2, y + 7, 2, 4);
-      // Pantalón oscuro
-      px("#334155", x + 1, y + 13, 2, 5 + step);
-      px("#334155", x + 4, y + 13, 2, 5 - step);
+    function drawPalm(x, gY) {
+      px("#78350f", x, gY - 18, 2, 18);
+      px("#10b981", x - 5, gY - 20, 12, 2); px("#10b981", x - 4, gY - 22, 10, 2);
+      px("#059669", x - 6, gY - 18, 3, 2); px("#059669", x + 5, gY - 18, 3, 2);
     }
-
-    function drawHugCouple(centerX, groundY, time) {
-      const sway = Math.round(Math.sin(time * 2.5) * 0.6);
-      const gx = centerX - 5 + sway;
-      const bx = centerX + sway;
-      const gy = groundY - 17;
-      const by = groundY - 18;
-
-      // Chica a la izquierda mirando a la derecha
-      px("#451a03", gx, gy, 6, 10);
-      px("#fed7aa", gx + 2, gy + 2, 4, 4);
-      px("#f43f5e", gx + 1, gy + 6, 5, 6);
-      px("#1d4ed8", gx + 1, gy + 12, 2, 5);
-      px("#1d4ed8", gx + 3, gy + 12, 2, 5);
-
-      // Chico a la derecha abrazándola
-      px("#1e293b", bx + 1, by, 5, 3);
-      px("#fed7aa", bx, by + 2, 4, 4);
-      px("#10b981", bx, by + 6, 5, 7);
-      px("#334155", bx + 1, by + 13, 2, 5);
-      px("#334155", bx + 3, by + 13, 2, 5);
-
-      // Brazo del abrazo rodeando
+    function drawBuildings(gY, t) {
+      [[4,16,42],[24,14,56],[42,18,38],[W-38,16,50],[W-18,15,36]].forEach(([x,w,h]) => {
+        px("#0f172a", x, gY - h, w, h);
+        for (let wy = gY - h + 5; wy < gY - 8; wy += 7)
+          for (let wx = x + 3; wx < x + w - 4; wx += 5)
+            px(((wx + wy + Math.floor(t)) % 3) ? "#fde047" : "#334155", wx, wy, 2, 3);
+      });
+    }
+    function drawSign(txt, x, gY) {
+      px("#64748b", x, gY - 22, 2, 22);
+      const tw = txtW(txt) + 6, sx = Math.max(2, Math.min(W - tw - 2, x - Math.floor(tw / 2)));
+      px("#1d4ed8", sx, gY - 30, tw, 9); px("#93c5fd", sx, gY - 30, tw, 1);
+      drawTxt(txt, sx + 3, gY - 28, "#fff");
+    }
+    function drawRoad(gY, runway) {
+      px(runway ? "#1e293b" : "#334155", 0, gY, W, 5);
+      px("#1e293b", 0, gY + 5, W, H - gY - 5);
+      const my = gY + (runway ? 10 : Math.min(18, Math.floor((H - gY) * 0.45)));
+      for (let x = 4; x < W; x += 15) {
+        px(runway ? "#f8fafc" : "#facc15", x, my, 7, 2);
+        if (runway) px("#ef4444", x, gY + 1, 2, 2);
+      }
+    }
+    function drawTerminal(t1, t2, x, gY, w) {
+      const y = gY - 38;
+      px("#1e293b", x, y, w, 38); px("#334155", x - 2, y - 3, w + 4, 3);
+      px("#38bdf8", x + 4, y + 14, w - 8, 12);
+      const dx = x + Math.floor(w / 2) - 6;
+      px("#0f172a", dx, gY - 11, 12, 11); px("#bae6fd", dx + 1, gY - 10, 4, 10); px("#bae6fd", dx + 7, gY - 10, 4, 10);
+      const tw1 = txtW(t1) + 4, sx1 = x + Math.floor((w - tw1) / 2);
+      px("#0f172a", sx1, y - 11, tw1, 8); drawTxt(t1, sx1 + 2, y - 9, "#ffd166");
+      drawTxt(t2, x + Math.floor((w - txtW(t2)) / 2), y + 5, "#f8fafc");
+    }
+    function drawTaxi(x, y, mov) {
+      const ty = y + (mov ? Math.round(Math.sin(Date.now() / 80)) : 0);
+      px("#facc15", x + 5, ty, 16, 6); px("#fff", x + 10, ty - 3, 6, 3); px("#0f172a", x + 12, ty - 2, 2, 1);
+      px("#38bdf8", x + 6, ty + 1, 6, 4); px("#38bdf8", x + 14, ty + 1, 6, 4);
+      px("#eab308", x, ty + 6, 27, 7); px("#0f172a", x + 2, ty + 9, 23, 1);
+      px("#fef08a", x + 25, ty + 7, 2, 3); px("#ef4444", x, ty + 7, 2, 3);
+      px("#090d16", x + 4, ty + 11, 5, 5); px("#090d16", x + 18, ty + 11, 5, 5);
+    }
+    const drawBag = (x, y) => { px("#475569", x + 2, y - 3, 1, 3); px("#d946ef", x, y, 5, 7); px("#f0abfc", x + 1, y + 1, 1, 5); };
+    function drawGirl(x, y, ph, wave) {
+      const st = Math.round(Math.sin(ph) * 1.5);
+      px("#451a03", x, y, 7, 10); px("#fed7aa", x + 2, y + 2, 4, 4); px("#0f172a", x + 4, y + 3, 1, 1);
+      px("#f43f5e", x + 1, y + 6, 5, 6);
+      if (wave) { px("#f43f5e", x - 2, y + 3, 3, 2); px("#fed7aa", x - 3, y + 2, 2, 2); }
+      px("#1d4ed8", x + 1, y + 12, 2, 5 + st); px("#1d4ed8", x + 4, y + 12, 2, 5 - st);
+    }
+    function drawBoy(x, y, ph) {
+      const st = Math.round(Math.sin(ph) * 1.5);
+      px("#1e293b", x + 1, y, 5, 3); px("#fed7aa", x + 1, y + 2, 4, 4); px("#0f172a", x + 2, y + 3, 1, 1);
+      px("#10b981", x + 1, y + 6, 5, 7); px("#334155", x + 1, y + 13, 2, 5 + st); px("#334155", x + 4, y + 13, 2, 5 - st);
+    }
+    function drawHug(cx, gY, t) {
+      const sw = Math.round(Math.sin(t * 2.5) * 0.6), gx = cx - 5 + sw, bx = cx + sw, gy = gY - 17, by = gY - 18;
+      px("#451a03", gx, gy, 6, 10); px("#fed7aa", gx + 2, gy + 2, 4, 4); px("#f43f5e", gx + 1, gy + 6, 5, 6); px("#1d4ed8", gx + 1, gy + 12, 4, 5);
+      px("#1e293b", bx + 1, by, 5, 3); px("#fed7aa", bx, by + 2, 4, 4); px("#10b981", bx, by + 6, 5, 7); px("#334155", bx + 1, by + 13, 4, 5);
       px("#10b981", gx + 3, gy + 7, 5, 2);
+      [[-4,0],[3,1.8],[-1,3.4]].forEach(([dx, off]) => {
+        const cyc = (t * 1.4 + off) % 4, hy = by - 5 - Math.round(cyc * 7), hx = cx + dx + Math.round(Math.sin(cyc * 2));
+        px("#f43f5e", hx, hy, 2, 2); px("#f43f5e", hx + 3, hy, 2, 2); px("#f43f5e", hx, hy + 1, 5, 2); px("#f43f5e", hx + 1, hy + 3, 3, 1);
+      });
+    }
+    function drawPlane(x, y, tilt) {
+      pctx.save(); pctx.translate(Math.round(x), Math.round(y)); pctx.rotate(tilt);
+      px("#1d4ed8", -18, -7, 5, 7); px("#facc15", -17, -5, 2, 3);
+      px("#f8fafc", -18, 0, 34, 7); px("#38bdf8", 13, 1, 4, 2);
+      for (let wx = -10; wx <= 9; wx += 4) px("#0f172a", wx, 2, 2, 2);
+      px("#1e40af", -4, 4, 12, 3); pctx.restore();
+    }
 
-      // Corazones flotantes
-      const hearts = [
-        { dx: -4, offset: 0 },
-        { dx: 3, offset: 1.8 },
-        { dx: -1, offset: 3.4 }
-      ];
-      for (const h of hearts) {
-        const cycle = (time * 1.4 + h.offset) % 4;
-        const hy = by - 5 - Math.round(cycle * 7);
-        const hx = centerX + h.dx + Math.round(Math.sin(cycle * 2));
-        px("#f43f5e", hx, hy, 2, 2);
-        px("#f43f5e", hx + 3, hy, 2, 2);
-        px("#f43f5e", hx, hy + 1, 5, 2);
-        px("#f43f5e", hx + 1, hy + 3, 3, 1);
-        px("#f43f5e", hx + 2, hy + 4, 1, 1);
+    // Countdown + Confetti + Story Loop
+    const targetDate = new Date("2026-11-14T07:00:00-05:00").getTime();
+    const elD = document.getElementById("days"), elH = document.getElementById("hours"),
+          elM = document.getElementById("minutes"), elS = document.getElementById("seconds"),
+          secBox = document.getElementById("sec-box"), statusTxt = document.getElementById("status-text"),
+          card = document.getElementById("main-card");
+    let celebrated = false, confetti = [];
+    const cCols = ["#ffd166","#ef476f","#06d6a0","#38bdf8","#f8fafc","#c084fc"];
+
+    function burst(ox, oy, n) {
+      for (let i = 0; i < n; i++) {
+        const a = -Math.PI / 2 + (Math.random() - 0.5) * 1.9, sp = Math.random() * 11 + 5;
+        confetti.push({ x: ox, y: oy, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp - 2, w: Math.random()*8+5, h: Math.random()*5+3,
+          c: cCols[i % cCols.length], r: Math.random()*6, rs: (Math.random()-0.5)*0.22, p: Math.random()*6, ps: Math.random()*0.08+0.03 });
       }
     }
 
-    function drawAirplane(x, y, tilt) {
-      pctx.save();
-      pctx.translate(Math.round(x), Math.round(y));
-      pctx.rotate(tilt);
-
-      // Cola vertical
-      px("#1d4ed8", -18, -7, 5, 7);
-      px("#facc15", -17, -5, 2, 3);
-      // Fuselaje
-      px("#f8fafc", -18, 0, 34, 7);
-      px("#e2e8f0", -16, 5, 30, 2);
-      // Nariz
-      px("#f8fafc", 16, 2, 4, 4);
-      // Cabina piloto
-      px("#38bdf8", 13, 1, 4, 2);
-      // Ventanillas pasajeros
-      for (let wx = -10; wx <= 9; wx += 4) {
-        px("#0f172a", wx, 2, 2, 2);
+    function updateTimer() {
+      const diff = targetDate - Date.now();
+      if (diff <= 0) {
+        elD.textContent = elH.textContent = elM.textContent = elS.textContent = "00";
+        if (!celebrated) {
+          celebrated = true; card.classList.add("celebrating");
+          statusTxt.textContent = "¡Llegó el momento! Bienvenida a Pereira ✨";
+          burst(fx.width * 0.5, fx.height * 0.65, 130);
+        }
+        return;
       }
-      // Ala principal
-      px("#1e40af", -4, 4, 12, 3);
-      px("#3b82f6", -6, 6, 10, 2);
-
-      pctx.restore();
+      const pad = v => String(v).padStart(2, "0");
+      elD.textContent = pad(Math.floor(diff / 86400000));
+      elH.textContent = pad(Math.floor((diff / 3600000) % 24));
+      elM.textContent = pad(Math.floor((diff / 60000) % 60));
+      elS.textContent = pad(Math.floor((diff / 1000) % 60));
+      secBox.classList.remove("tick"); void secBox.offsetWidth; secBox.classList.add("tick");
     }
+    updateTimer();
+    setInterval(updateTimer, 1000);
+    setTimeout(() => { if (!celebrated) burst(fx.width * 0.5, fx.height * 0.65, 95); }, 200);
 
-    // Secuencia de 6 tomas fluidas
-    let sceneIndex = 0;
-    let sceneElapsed = 0;
-    const SCENE_DURATION = 5200; // 5.2 segundos por toma
-    let lastFrameTime = performance.now();
-
-    function renderPixelStory(now) {
-      const dt = Math.min(100, now - lastFrameTime);
-      lastFrameTime = now;
-      sceneElapsed += dt;
-
-      if (sceneElapsed >= SCENE_DURATION) {
-        sceneElapsed = 0;
-        sceneIndex = (sceneIndex + 1) % 6;
-      }
-
-      const progress = sceneElapsed / SCENE_DURATION; // 0.0 -> 1.0
-      const t = sceneElapsed / 1000;
-      const groundY = Math.round(H * 0.78);
-
+    let sc = 0, el = 0, last = performance.now();
+    const DUR = 5200;
+    function frame(now) {
+      const dt = Math.min(100, now - last); last = now; el += dt;
+      if (el >= DUR) { el = 0; sc = (sc + 1) % 6; }
+      const pr = el / DUR, t = el / 1000, gY = Math.round(H * 0.78);
       pctx.clearRect(0, 0, W, H);
 
-      if (sceneIndex === 0) {
-        // TOMA 1: Chica con maleta tomando taxi en Bogotá
-        drawSky(["#0f172a", "#1e1b4b", "#4c1d95", "#9d174d", "#f97316"]);
-        drawBogotaHills(groundY);
-        drawCityBuildings(groundY, t);
-        drawRoad(groundY);
-        drawStreetSign("BOGOTA", Math.round(W * 0.82), groundY);
-
-        const girlX = Math.round(W * 0.64);
-        drawSuitcase(girlX + 8, groundY - 7);
-        drawGirl(girlX, groundY - 17, 0, progress < 0.65);
-
-        // Taxi llega desde la izquierda y se detiene frente a ella
-        const targetTaxiX = girlX - 31;
-        const startTaxiX = -32;
-        const moveRatio = Math.min(1, progress / 0.65);
-        const ease = 1 - Math.pow(1 - moveRatio, 3);
-        const taxiX = startTaxiX + (targetTaxiX - startTaxiX) * ease;
-        drawTaxi(taxiX, groundY - 8, moveRatio < 0.98);
+      if (sc === 0) {
+        drawSky(["#0f172a","#1e1b4b","#4c1d95","#9d174d","#f97316"]);
+        drawHills(gY, false); drawBuildings(gY, t); drawRoad(gY, false); drawSign("BOGOTA", Math.round(W * 0.82), gY);
+        const gx = Math.round(W * 0.64); drawBag(gx + 8, gY - 7); drawGirl(gx, gY - 17, 0, pr < 0.65);
+        const mr = Math.min(1, pr / 0.65), ease = 1 - Math.pow(1 - mr, 3);
+        drawTaxi(-32 + (gx - 31 + 32) * ease, gY - 8, mr < 0.98);
+      } else if (sc === 1) {
+        drawSky(["#0369a1","#0284c7","#38bdf8","#bae6fd"]); drawClouds(t, "rgba(255,255,255,0.65)");
+        const tw = Math.min(96, W - 12), tx = Math.floor((W - tw) / 2);
+        drawTerminal("EL DORADO", "BOGOTA", tx, gY, tw); drawRoad(gY, false);
+        const sx = Math.round(W * 0.22), mr = Math.min(1, pr / 0.45), ease = 1 - Math.pow(1 - mr, 3);
+        drawTaxi(-30 + (sx + 30) * ease, gY - 8, mr < 0.98);
+        if (pr >= 0.45) {
+          const wr = (pr - 0.45) / 0.55, gx = (sx + 26) + ((tx + Math.floor(tw / 2) - 3) - (sx + 26)) * wr;
+          drawGirl(gx, gY - 17, t * 8, false); drawBag(gx - 6, gY - 7);
+        }
+      } else if (sc === 2) {
+        drawSky(["#0c4a6e","#0284c7","#38bdf8","#7dd3fc","#e0f2fe"]); drawClouds(t * 2.5, "rgba(255,255,255,0.8)");
+        drawHills(gY, false); drawRoad(gY, true);
+        const lift = pr > 0.35 ? Math.pow((pr - 0.35) / 0.65, 1.6) * (H * 0.42) : 0;
+        drawPlane(-20 + (W + 45) * pr, (gY - 8) - lift, pr > 0.35 ? -0.28 : 0);
+      } else if (sc === 3) {
+        drawSky(["#0284c7","#38bdf8","#bae6fd","#fef08a"]); drawClouds(t * 1.5, "rgba(255,255,255,0.7)");
+        drawHills(gY, true); drawPalm(12, gY); drawRoad(gY, true);
+        const tw = Math.min(72, Math.floor(W * 0.62));
+        drawTerminal("MATECA\u00d1A", "PEREIRA", W - tw - 4, gY, tw);
+        const lr = Math.min(1, pr / 0.65), sy = Math.round(H * 0.36), ey = gY - 8;
+        drawPlane(-22 + (W * 0.72) * pr, sy + (ey - sy) * (1 - Math.pow(1 - lr, 2)), lr < 0.95 ? 0.22 * (1 - lr) : 0);
+      } else if (sc === 4) {
+        drawSky(["#0284c7","#38bdf8","#7dd3fc","#fde68a"]); drawHills(gY, true);
+        const tw = Math.min(86, W - 24);
+        drawTerminal("MATECA\u00d1A", "PEREIRA", 6, gY, tw); drawPalm(W - 10, gY); drawRoad(gY, false);
+        const sgx = 6 + Math.floor(tw / 2) - 3, gx = sgx + (Math.round(W * 0.76) - sgx) * pr;
+        drawGirl(gx, gY - 17, t * 8, false); drawBag(gx - 6, gY - 7);
+      } else {
+        drawSky(["#1e1b4b","#6d28d9","#db2777","#f97316","#fde047"]); drawHills(gY, true);
+        drawPalm(10, gY); drawPalm(W - 12, gY); drawRoad(gY, false); drawSign("PEREIRA", Math.round(W * 0.18), gY);
+        const c = Math.round(W * 0.52); drawBag(c - 16, gY - 7);
+        if (pr < 0.42) {
+          const ap = pr / 0.42;
+          drawGirl((c - 14) + 9 * ap, gY - 17, t * 6, false);
+          drawBoy((W - 14) - ((W - 14) - c) * ap, gY - 18, t * 8);
+        } else { drawHug(c, gY, t); }
       }
-      else if (sceneIndex === 1) {
-        // TOMA 2: Taxi llegando al Aeropuerto El Dorado
+
+      const fa = el < 350 ? 1 - el / 350 : (el > DUR - 350 ? (el - (DUR - 350)) / 350 : 0);
+      if (fa > 0) { pctx.fillStyle = `rgba(9,13,22,${fa.toFixed(2)})`; pctx.fillRect(0, 0, W, H); }
+
+      fctx.clearRect(0, 0, fx.width, fx.height);
+      for (let i = confetti.length - 1; i >= 0; i--) {
+        const c = confetti[i]; c.vy += 0.22; c.vx *= 0.985; c.p += c.ps; c.x += c.vx + Math.sin(c.p)*0.9; c.y += c.vy; c.r += c.rs;
+        if (c.y > fx.height + 30) { confetti.splice(i, 1); continue; }
+        fctx.save(); fctx.translate(c.x, c.y); fctx.rotate(c.r); fctx.scale(1, Math.cos(c.p));
+        fctx.fillStyle = c.c; fctx.fillRect(-c.w/2, -c.h/2, c.w, c.h); fctx.restore();
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+
+    // Música ambiental
+    const aBtn = document.getElementById("audio-toggle"), aLbl = document.getElementById("audio-label");
+    let actx = null, gain = null, iv = null, play = false, step = 0;
+    const chords = [[174.6,220,261.6,329.6,392],[130.8,196,246.9,293.7,329.6],[220,261.6,329.6,392,587.3],[196,261.6,329.6,392,440]];
+    function playChord(f) {
+      if (!actx || !play) return;
+      const now = actx.currentTime;
+      f.forEach((hz, i) => {
+        const o = actx.createOscillator(), fl = actx.createBiquadFilter(), g = actx.createGain();
+        o.type = i % 2 ? "triangle" : "sine"; o.frequency.setValueAtTime(hz, now); o.detune.setValueAtTime((i-2)*4, now);
+        fl.type = "lowpass"; fl.frequency.setValueAtTime(620, now);
+        g.gain.setValueAtTime(0.0001, now); g.gain.linearRampToValueAtTime(0.032, now + 1.6); g.gain.exponentialRampToValueAtTime(0.0001, now + 5.2);
+        o.connect(fl); fl.connect(g); g.connect(gain); o.start(now); o.stop(now + 5.3);
+      });
+    }
+    aBtn.addEventListener("click", async () => {
+      if (!actx) { actx = new (window.AudioContext || window.webkitAudioContext)(); gain = actx.createGain(); gain.gain.setValueAtTime(0.0001, actx.currentTime); gain.connect(actx.destination); }
+      if (actx.state === "suspended") await actx.resume();
+      const now = actx.currentTime;
+      if (!play) {
+        play = true; aBtn.classList.add("playing"); aLbl.textContent = "Pausar";
+        gain.gain.cancelScheduledValues(now); gain.gain.setValueAtTime(Math.max(g
