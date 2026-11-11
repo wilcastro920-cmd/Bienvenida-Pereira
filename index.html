@@ -654,4 +654,217 @@
       }
 
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / 1000 / 60) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+
+      daysEl.textContent = pad(days);
+      hoursEl.textContent = pad(hours);
+      minutesEl.textContent = pad(minutes);
+      secondsEl.textContent = pad(seconds);
+
+      secBox.classList.remove("tick");
+      void secBox.offsetWidth;
+      secBox.classList.add("tick");
+    }
+
+    // ==========================================
+    // 3. CANVAS DE EFECTOS (CONFETI DE FONDO)
+    // ==========================================
+    const canvas = document.getElementById("fx-canvas");
+    const ctx = canvas.getContext("2d");
+    let ambientParticles = [];
+    let confettiPieces = [];
+
+    const confettiColors = ["#ffd166", "#ef476f", "#06d6a0", "#38bdf8", "#f8fafc", "#c084fc"];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    // Partículas doradas
+    for (let i = 0; i < 45; i++) {
+      ambientParticles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 2.2 + 0.6,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: -Math.random() * 0.6 - 0.2,
+        alpha: Math.random() * 0.6 + 0.2
+      });
+    }
+
+    function spawnConfettiBurst(originX, originY, count) {
+      for (let i = 0; i < count; i++) {
+        const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.9;
+        const speed = Math.random() * 11 + 5;
+        confettiPieces.push({
+          x: originX,
+          y: originY,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 2,
+          w: Math.random() * 8 + 5,
+          h: Math.random() * 5 + 3,
+          color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
+          rotation: Math.random() * Math.PI * 2,
+          rotationSpeed: (Math.random() - 0.5) * 0.22,
+          swayPhase: Math.random() * Math.PI * 2,
+          swaySpeed: Math.random() * 0.08 + 0.03
+        });
+      }
+    }
+
+    function renderLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (const p of ambientParticles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.y < -10) p.y = canvas.height + 10;
+        if (p.x < -10) p.x = canvas.width + 10;
+        if (p.x > canvas.width + 10) p.x = -10;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 209, 102, ${p.alpha})`;
+        ctx.fill();
+      }
+
+      for (let i = confettiPieces.length - 1; i >= 0; i--) {
+        const c = confettiPieces[i];
+        c.vy += 0.22;
+        c.vx *= 0.985;
+        c.swayPhase += c.swaySpeed;
+        c.x += c.vx + Math.sin(c.swayPhase) * 0.9;
+        c.y += c.vy;
+        c.rotation += c.rotationSpeed;
+
+        if (c.y > canvas.height + 30) {
+          confettiPieces.splice(i, 1);
+          continue;
+        }
+
+        ctx.save();
+        ctx.translate(c.x, c.y);
+        ctx.rotate(c.rotation);
+        ctx.scale(1, Math.cos(c.swayPhase));
+        ctx.fillStyle = c.color;
+        ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
+        ctx.restore();
+      }
+
+      requestAnimationFrame(renderLoop);
+    }
+
+    // Iniciar bucles de renderizado
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+    renderLoop();
+    drawPixelArtScene(); // Activar película retro
+
+    // Ráfaga al abrir
+    setTimeout(() => {
+      if (!hasCelebrated) {
+        spawnConfettiBurst(canvas.width * 0.5, canvas.height * 0.65, 90);
+      }
+    }, 200);
+
+    // ==========================================
+    // 4. SINTETIZADOR DE MÚSICA AMBIENTAL
+    // ==========================================
+    const audioBtn = document.getElementById("audio-toggle");
+    const audioLabel = document.getElementById("audio-label");
+
+    let audioCtx = null;
+    let masterGain = null;
+    let chordInterval = null;
+    let isPlaying = false;
+    let chordStep = 0;
+
+    const ambientChords = [
+      [174.61, 220.00, 261.63, 329.63, 392.00], // Fmaj9
+      [130.81, 196.00, 246.94, 293.66, 329.63], // Cmaj9
+      [220.00, 261.63, 329.63, 392.00, 587.33], // Am11
+      [196.00, 261.63, 329.63, 392.00, 440.00]  // G6sus4
+    ];
+
+    function playAmbientChord(frequencies) {
+      if (!audioCtx || !isPlaying) return;
+      const now = audioCtx.currentTime;
+      const duration = 5.2;
+
+      frequencies.forEach((freq, idx) => {
+        const osc = audioCtx.createOscillator();
+        const filter = audioCtx.createBiquadFilter();
+        const noteGain = audioCtx.createGain();
+
+        osc.type = idx % 2 === 0 ? "sine" : "triangle";
+        osc.frequency.setValueAtTime(freq, now);
+        osc.detune.setValueAtTime((idx - 2) * 4, now);
+
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(620, now);
+
+        noteGain.gain.setValueAtTime(0.0001, now);
+        noteGain.gain.linearRampToValueAtTime(0.032, now + 1.6);
+        noteGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+        osc.connect(filter);
+        filter.connect(noteGain);
+        noteGain.connect(masterGain);
+
+        osc.start(now);
+        osc.stop(now + duration + 0.1);
+      });
+    }
+
+    async function toggleAmbientMusic() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContextClass();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+        masterGain.connect(audioCtx.destination);
+      }
+
+      if (audioCtx.state === "suspended") {
+        await audioCtx.resume();
+      }
+
+      const now = audioCtx.currentTime;
+
+      if (!isPlaying) {
+        isPlaying = true;
+        audioBtn.classList.add("playing");
+        audioLabel.textContent = "Pausar música";
+
+        masterGain.gain.cancelScheduledValues(now);
+        masterGain.gain.setValueAtTime(Math.max(masterGain.gain.value, 0.0001), now);
+        masterGain.gain.linearRampToValueAtTime(0.85, now + 1.2);
+
+        playAmbientChord(ambientChords[chordStep % ambientChords.length]);
+        chordStep++;
+        chordInterval = setInterval(() => {
+          playAmbientChord(ambientChords[chordStep % ambientChords.length]);
+          chordStep++;
+        }, 4200);
+      } else {
+        isPlaying = false;
+        audioBtn.classList.remove("playing");
+        audioLabel.textContent = "Música ambiental";
+
+        clearInterval(chordInterval);
+        masterGain.gain.cancelScheduledValues(now);
+        masterGain.gain.setValueAtTime(Math.max(masterGain.gain.value, 0.0001), now);
+        masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.8);
+      }
+    }
+
+    audioBtn.addEventListener("click", toggleAmbientMusic);
+  </script>
+</body>
+</html>
